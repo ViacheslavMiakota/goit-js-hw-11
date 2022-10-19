@@ -50,7 +50,7 @@ async function onLoadClick() {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
   lightbox.refresh();
   const amountOfPages = totalHits / 40 - page;
-  if (amountOfPages < 1) {
+  if (amountOfPages <= 1) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
