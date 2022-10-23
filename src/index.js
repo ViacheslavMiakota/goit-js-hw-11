@@ -42,14 +42,13 @@ const onSubmit = async event => {
 };
 
 const onLoadClick = async () => {
-  page += 1;
   const response = await getPictures(query);
   const { hits, totalHits } = response;
   const markup = hits.map(item => createMarkup(item)).join('');
   refs.gallery.insertAdjacentHTML('beforeend', markup);
   const amountOfPages = Math.ceil(totalHits / perPage) - page;
   console.log('amountOfPages', amountOfPages);
-  console.log('page', page);
+
   if (amountOfPages <= 1) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info(
