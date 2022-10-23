@@ -2,16 +2,13 @@ import './css/style.css';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { getPictures, page, query } from './UnsplashAPI';
+import { getPictures, page, query } from './pixabayAPI';
 import { createMarkup } from './markup';
 import { refs } from './refs';
 
-refs.form.addEventListener('submit', onSubmit);
-refs.loadMoreBtn.addEventListener('click', onLoadClick);
-
 const lightbox = new SimpleLightbox('.gallery a');
 
-async function onSubmit(event) {
+const onSubmit = async event => {
   event.preventDefault();
   lightbox.refresh();
   const searchQuery = event.currentTarget.elements.searchQuery.value
@@ -35,25 +32,30 @@ async function onSubmit(event) {
     refs.gallery.innerHTML = markup;
     if (totalHits > 40) {
       refs.loadMoreBtn.classList.remove('is-hidden');
-      page += 1;
+      lightbox.refresh();
     }
   } catch (error) {
     Notiflix.Notify.failure('Something went wrong! Please retry');
     console.log(error);
   }
-}
+};
 
-async function onLoadClick() {
+const onLoadClick = async () => {
   const response = await getPictures(query);
   const { hits, totalHits } = response;
   const markup = hits.map(item => createMarkup(item)).join('');
   refs.gallery.insertAdjacentHTML('beforeend', markup);
   lightbox.refresh();
   const amountOfPages = totalHits / 40 - page;
-  if (amountOfPages <= 1) {
+  if (amountOfPages < 1) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
   }
-}
+  console.log('amountOfPages', amountOfPages);
+  console.log('page', page);
+  console.log('totalHits', totalHits);
+};
+refs.form.addEventListener('submit', onSubmit);
+refs.loadMoreBtn.addEventListener('click', onLoadClick);
