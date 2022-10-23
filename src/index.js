@@ -14,6 +14,7 @@ const onSubmit = async event => {
   const searchQuery = event.currentTarget.elements.searchQuery.value
     .trim()
     .toLowerCase();
+
   if (!searchQuery) {
     Notiflix.Notify.failure('Enter a search query!');
     return;
@@ -32,8 +33,9 @@ const onSubmit = async event => {
     refs.gallery.innerHTML = markup;
     if (totalHits > 40) {
       refs.loadMoreBtn.classList.remove('is-hidden');
-      lightbox.refresh();
     }
+    console.log('page', page);
+    console.log('totalHits', totalHits);
   } catch (error) {
     Notiflix.Notify.failure('Something went wrong! Please retry');
     console.log(error);
@@ -41,21 +43,20 @@ const onSubmit = async event => {
 };
 
 const onLoadClick = async () => {
+  lightbox.refresh();
   const response = await getPictures(query);
   const { hits, totalHits } = response;
   const markup = hits.map(item => createMarkup(item)).join('');
   refs.gallery.insertAdjacentHTML('beforeend', markup);
-  lightbox.refresh();
-  const amountOfPages = totalHits / 40 - page;
+  const amountOfPages = Math.ceil(totalHits / 40) - page;
+  console.log('page', page);
+  console.log('totalHits', totalHits);
   if (amountOfPages < 1) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
   }
-  console.log('amountOfPages', amountOfPages);
-  console.log('page', page);
-  console.log('totalHits', totalHits);
 };
 refs.form.addEventListener('submit', onSubmit);
 refs.loadMoreBtn.addEventListener('click', onLoadClick);
