@@ -2,7 +2,7 @@ import './css/style.css';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { getPictures, page, query } from './pixabayAPI';
+import { getPictures, page, perPage, query } from './pixabayAPI';
 import { createMarkup } from './markup';
 import { refs } from './refs';
 
@@ -14,14 +14,15 @@ const onSubmit = async event => {
   const searchQuery = event.currentTarget.elements.searchQuery.value
     .trim()
     .toLowerCase();
-
   if (!searchQuery) {
     Notiflix.Notify.failure('Enter a search query!');
     return;
   }
+
   try {
     const searchData = await getPictures(searchQuery);
     const { hits, totalHits } = searchData;
+    console.log('totalHits', totalHits);
     if (hits.length === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
@@ -34,8 +35,6 @@ const onSubmit = async event => {
     if (totalHits > 40) {
       refs.loadMoreBtn.classList.remove('is-hidden');
     }
-    console.log('page', page);
-    console.log('totalHits', totalHits);
   } catch (error) {
     Notiflix.Notify.failure('Something went wrong! Please retry');
     console.log(error);
@@ -43,15 +42,15 @@ const onSubmit = async event => {
 };
 
 const onLoadClick = async () => {
-  lightbox.refresh();
+  page += 1;
   const response = await getPictures(query);
   const { hits, totalHits } = response;
   const markup = hits.map(item => createMarkup(item)).join('');
   refs.gallery.insertAdjacentHTML('beforeend', markup);
-  const amountOfPages = Math.ceil(totalHits / 40) - page;
+  const amountOfPages = Math.ceil(totalHits / perPage) - page;
+  console.log('amountOfPages', amountOfPages);
   console.log('page', page);
-  console.log('totalHits', totalHits);
-  if (amountOfPages < 1) {
+  if (amountOfPages <= 1) {
     refs.loadMoreBtn.classList.add('is-hidden');
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
